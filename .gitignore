@@ -1,0 +1,51 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# env / secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# next / build
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# payload
+apps/admin/media/
+apps/admin/public/media/
+
+# logs / OS
+*.log
+install*.log
+install-ndjson.log
+npm-debug.log*
+
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# test / coverage
+coverage/
+playwright-report/
+test-results/
+
+# docker
+pgdata/
+
+# generated knowledge graph
+graphify-out/
+apps/**/graphify-out/
+
+# local tooling noise
+install-log.txt
+*.check.ts
+*.check.mjs

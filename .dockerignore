@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+.git
+.next
+**/.next
+dist
+**/dist
+.env
+.env.local
+*.log
+.pnpm-store
+pgdata
+_tmp_payload
+docs
+graphify-out
+.pnpm-install.log

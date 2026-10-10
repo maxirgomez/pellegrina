@@ -1,0 +1,32 @@
+{
+  "name": "tierra-noble",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Tierra Noble — landing monorepo (storefront + Payload admin)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm --parallel --filter @tn/storefront --filter @tn/admin dev",
+    "dev:storefront": "pnpm --filter @tn/storefront dev",
+    "dev:admin": "pnpm --filter @tn/admin dev",
+    "build": "pnpm --filter @tn/core build && pnpm --filter @tn/admin build && pnpm --filter @tn/storefront build",
+    "lint": "pnpm -r --if-present lint",
+    "seed": "pnpm --filter @tn/admin seed",
+    "format": "prettier --write ."
+  },
+  "engines": {
+    "node": ">=20.9.0",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint": "^9.16.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+@import '../styles/pellegrina.css';
+
+@theme {
+  --color-paper: #fbf8f2;
+  --color-paper-2: #f2eee4;
+  --color-ink: #1d1a17;
+  --color-ink-soft: #5b544c;
+  --color-line: #ddd5c7;
+  --color-agua: #a9d6e1;
+  --color-agua-soft: #dcf0f4;
+  --color-agua-deep: #2c6675;
+  --color-aire: #cfeac1;
+  --color-aire-soft: #e9f6e2;
+  --color-aire-deep: #46733c;
+  --color-tierra: #b45f2e;
+  --color-wa: #1f8f4e;
+}
+

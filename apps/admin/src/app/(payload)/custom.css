@@ -1,0 +1,219 @@
+/* Pellegrina admin identity — overrides Payload defaults */
+
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+  /* Warm paper → ink (from storefront --paper / --ink / --line) */
+  --color-base-0: #ffffff;
+  --color-base-50: #fbf8f2;
+  --color-base-100: #f5f0e6;
+  --color-base-150: #ddd5c7;
+  --color-base-200: #d0c7b6;
+  --color-base-250: #c2b8a4;
+  --color-base-300: #b0a490;
+  --color-base-350: #9e9180;
+  --color-base-400: #8a7e6e;
+  --color-base-450: #766b5d;
+  --color-base-500: #5b544c;
+  --color-base-550: #4f4943;
+  --color-base-600: #433e39;
+  --color-base-650: #383430;
+  --color-base-700: #2e2a27;
+  --color-base-750: #262320;
+  --color-base-800: #1d1a17;
+  --color-base-850: #161310;
+  --color-base-900: #100e0c;
+  --color-base-950: #0a0908;
+  --color-base-1000: #050403;
+
+  /* Accent blues → agua */
+  --color-blue-50: #f0f9fb;
+  --color-blue-100: #dcf0f4;
+  --color-blue-150: #c5e6ed;
+  --color-blue-200: #a9d6e1;
+  --color-blue-250: #8fc8d6;
+  --color-blue-300: #74b7c8;
+  --color-blue-350: #5a9faf;
+  --color-blue-400: #458a9b;
+  --color-blue-450: #387888;
+  --color-blue-500: #2c6675;
+  --color-blue-550: #275c69;
+  --color-blue-600: #22525d;
+  --color-blue-650: #1d4852;
+  --color-blue-700: #193e46;
+  --color-blue-750: #14343b;
+  --color-blue-800: #102b31;
+  --color-blue-850: #0c2227;
+  --color-blue-900: #08181c;
+  --color-blue-950: #050f12;
+
+  /* Success → aire (verde logo) */
+  --color-success-50: #f3faf0;
+  --color-success-100: #e9f6e2;
+  --color-success-150: #d9efcd;
+  --color-success-200: #cfeac1;
+  --color-success-250: #b9dfa6;
+  --color-success-300: #9dce84;
+  --color-success-350: #7fb564;
+  --color-success-400: #62994a;
+  --color-success-450: #528640;
+  --color-success-500: #46733c;
+  --color-success-550: #3e6736;
+  --color-success-600: #365a2f;
+  --color-success-650: #2e4e29;
+  --color-success-700: #274223;
+  --color-success-750: #1f361c;
+  --color-success-800: #192b16;
+  --color-success-850: #132111;
+  --color-success-900: #0e180c;
+  --color-success-950: #080e07;
+
+  /* Warning → tierra */
+  --color-warning-50: #fbf3ee;
+  --color-warning-100: #f6e4d6;
+  --color-warning-150: #efd0b8;
+  --color-warning-200: #e5b693;
+  --color-warning-250: #d9986e;
+  --color-warning-300: #cd7c4d;
+  --color-warning-350: #c06a3a;
+  --color-warning-400: #b45f2e;
+  --color-warning-450: #a15328;
+  --color-warning-500: #8f4720;
+  --color-warning-550: #7e3e1c;
+  --color-warning-600: #6d3618;
+  --color-warning-650: #5c2e14;
+  --color-warning-700: #4c2611;
+  --color-warning-750: #3d1e0e;
+  --color-warning-800: #2f170b;
+  --color-warning-850: #231108;
+  --color-warning-900: #180c06;
+  --color-warning-950: #0e0703;
+
+  --font-body: 'Karla', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+  --style-radius-s: 6px;
+  --style-radius-m: 10px;
+  --style-radius-l: 14px;
+}
+
+/*
+  Force brand light elevations even if a leftover dark cookie is present.
+  admin.theme = 'light' locks the toggle; this keeps the UI paper-toned.
+*/
+html,
+html[data-theme='light'],
+html[data-theme='dark'] {
+  color-scheme: light;
+  --theme-bg: #fbf8f2;
+  --theme-input-bg: #ffffff;
+  --theme-text: #1d1a17;
+  --theme-overlay: rgba(29, 26, 23, 0.45);
+  --theme-elevation-0: #ffffff;
+  --theme-elevation-50: #fbf8f2;
+  --theme-elevation-100: #f5f0e6;
+  --theme-elevation-150: #ddd5c7;
+  --theme-elevation-200: #d0c7b6;
+  --theme-elevation-250: #c2b8a4;
+  --theme-elevation-300: #b0a490;
+  --theme-elevation-350: #9e9180;
+  --theme-elevation-400: #8a7e6e;
+  --theme-elevation-450: #766b5d;
+  --theme-elevation-500: #5b544c;
+  --theme-elevation-550: #4f4943;
+  --theme-elevation-600: #433e39;
+  --theme-elevation-650: #383430;
+  --theme-elevation-700: #2e2a27;
+  --theme-elevation-750: #262320;
+  --theme-elevation-800: #1d1a17;
+  --theme-elevation-850: #161310;
+  --theme-elevation-900: #100e0c;
+  --theme-elevation-950: #0a0908;
+  --theme-elevation-1000: #050403;
+  --theme-border-color: #ddd5c7;
+}
+
+/* Primary actions → tierra (brand CTA) */
+.btn--style-primary {
+  --bg-color: #b45f2e;
+  --hover-bg: #8f4720;
+  --color: #fff;
+}
+
+/* Surfaces: paper + soft brand washes */
+body,
+.template-default,
+.template-default__wrap,
+.nav,
+.app-header,
+.doc-header,
+.collection-list,
+.dashboard {
+  background-color: #fbf8f2;
+  color: #1d1a17;
+}
+
+.template-default--nav-aside-hidden .template-default__wrap,
+.login,
+.create-first-user {
+  background:
+    radial-gradient(ellipse 80% 50% at 90% -10%, #dcf0f4 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, #e9f6e2 0%, transparent 50%),
+    #fbf8f2;
+}
+
+input,
+textarea,
+select,
+.field-type__wrap,
+.react-select__control {
+  background-color: #ffffff !important;
+  color: #1d1a17 !important;
+}
+
+.pellegrina-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--theme-text);
+  text-decoration: none;
+}
+
+.pellegrina-logo__mark {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.pellegrina-logo__text {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.55rem;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+
+.pellegrina-logo__text small {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #2c6675;
+  margin-top: 2px;
+}
+
+.pellegrina-icon {
+  display: block;
+  border-radius: 50%;
+}
+
+.nav__header {
+  border-bottom-color: #ddd5c7;
+}
+
+.nav__link:hover,
+.nav__link.active {
+  background: color-mix(in srgb, #a9d6e1 28%, transparent);
+}

@@ -1,0 +1,90 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-tierra_noble}
+    ports:
+      # Host 5434 — 5432/5433 often taken by local/other Docker Postgres
+      - '5434:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-tierra_noble}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  maildev:
+    image: maildev/maildev:2.1.0
+    profiles: ['mail']
+    ports:
+      - '1080:1080'
+      - '1025:1025'
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      target: dev
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URI: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-tierra_noble}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:-http://localhost:3001}
+      STOREFRONT_URL: ${STOREFRONT_URL:-http://localhost:3000}
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./apps/admin:/app/apps/admin
+      - ./packages:/app/packages
+      - ./package.json:/app/package.json
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
+      - ./tsconfig.base.json:/app/tsconfig.base.json
+      # do NOT mount host node_modules
+      - admin_node_modules:/app/node_modules
+      - admin_app_node_modules:/app/apps/admin/node_modules
+
+  storefront:
+    build:
+      context: .
+      dockerfile: apps/storefront/Dockerfile
+      target: dev
+    restart: unless-stopped
+    depends_on:
+      - admin
+    env_file:
+      - .env
+    environment:
+      PAYLOAD_URL: http://admin:3001
+      NEXT_PUBLIC_PAYLOAD_URL: ${NEXT_PUBLIC_PAYLOAD_URL:-http://localhost:3001}
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY:-}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-}
+      RECAPTCHA_MIN_SCORE: ${RECAPTCHA_MIN_SCORE:-0.5}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      CONTACT_EMAIL_FROM: ${CONTACT_EMAIL_FROM:-}
+      CONTACT_EMAIL_TO: ${CONTACT_EMAIL_TO:-}
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./apps/storefront:/app/apps/storefront
+      - ./packages:/app/packages
+      - ./package.json:/app/package.json
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
+      - ./tsconfig.base.json:/app/tsconfig.base.json
+      - storefront_node_modules:/app/node_modules
+      - storefront_app_node_modules:/app/apps/storefront/node_modules
+
+volumes:
+  pgdata:
+  admin_node_modules:
+  admin_app_node_modules:
+  storefront_node_modules:
+  storefront_app_node_modules:
