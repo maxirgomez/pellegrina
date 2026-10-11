@@ -15,7 +15,10 @@ const dirname = path.dirname(filename)
 
 const storefrontOrigin = process.env.STOREFRONT_URL || 'http://localhost:3000'
 
-/** Prefer cloud URLs; append Supabase pooler / TLS flags Drizzle + node-pg need on Vercel. */
+/**
+ * Prefer cloud URLs. Supabase transaction pooler (:6543) cannot run DDL / drizzle push,
+ * so rewrite to session mode (:5432) on the same pooler host (works from Vercel IPv4).
+ */
 function resolveDatabaseUri(): string {
   let uri =
     process.env.DATABASE_URL ||
@@ -27,18 +30,22 @@ function resolveDatabaseUri(): string {
   const isSupabase = /supabase\.com|:6543\b/.test(uri)
   if (!isSupabase) return uri
 
+  // Transaction → Session pooler (DDL + Payload txs need session)
+  if (/:6543\b/.test(uri)) {
+    uri = uri.replace(/:6543\b/, ':5432')
+    uri = uri
+      .replace(/[?&]pgbouncer=true/gi, '')
+      .replace(/[?&]prepareThreshold=\d+/gi, '')
+      .replace(/\?&/, '?')
+      .replace(/[?&]$/, '')
+  }
+
   const join = (u: string) => (u.includes('?') ? '&' : '?')
   // Vercel Node rejects Supabase chain with sslmode=require → use no-verify
   if (/[?&]sslmode=/.test(uri)) {
     uri = uri.replace(/([?&]sslmode=)[^&]*/i, '$1no-verify')
   } else {
     uri += `${join(uri)}sslmode=no-verify`
-  }
-  const isPooler = /pooler\.supabase\.com|:6543\b/.test(uri)
-  if (isPooler) {
-    if (!/[?&]pgbouncer=/.test(uri)) uri += `${join(uri)}pgbouncer=true`
-    // node-pg: disable prepared statements (unsupported in transaction pooler)
-    if (!/[?&]prepareThreshold=/.test(uri)) uri += `${join(uri)}prepareThreshold=0`
   }
   return uri
 }

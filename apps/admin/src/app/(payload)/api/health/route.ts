@@ -12,6 +12,7 @@ export async function GET() {
       pages: pages.totalDocs,
       db: 'connected',
       push,
+      pool: 'session',
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
