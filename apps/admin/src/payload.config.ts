@@ -46,6 +46,15 @@ function resolveDatabaseUri(): string {
 const databaseUri = resolveDatabaseUri()
 const isSupabaseDb = /supabase\.com|:6543\b/.test(databaseUri)
 
+/** Empty Supabase needs drizzle push once; set PAYLOAD_DATABASE_PUSH=false after schema exists. */
+function shouldPushSchema(): boolean {
+  const raw = (process.env.PAYLOAD_DATABASE_PUSH || '').trim().toLowerCase()
+  if (raw === 'false' || raw === '0' || raw === 'no') return false
+  if (raw === 'true' || raw === '1' || raw === 'yes') return true
+  // Vercel first boot: push when the flag is unset (tables missing → health 500)
+  return process.env.VERCEL === '1'
+}
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -78,8 +87,8 @@ export default buildConfig({
       // Supabase pooler presents a chain Node rejects on Vercel without this
       ...(isSupabaseDb ? { ssl: { rejectUnauthorized: false } } : {}),
     },
-    // ponytail: empty Supabase needs one push/seed; set PAYLOAD_DATABASE_PUSH=true once, then off
-    push: process.env.PAYLOAD_DATABASE_PUSH === 'true',
+    // ponytail: empty Supabase needs one push/seed; set PAYLOAD_DATABASE_PUSH=false after tables exist
+    push: shouldPushSchema(),
   }),
   cors: [storefrontOrigin],
   csrf: [storefrontOrigin],
