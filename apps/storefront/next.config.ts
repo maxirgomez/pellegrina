@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 
 loadEnv({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.env') })
 
-const payloadUrl = process.env.NEXT_PUBLIC_PAYLOAD_URL || process.env.PAYLOAD_URL || ''
+const payloadUrl = process.env.PPAYLOAD_URL || process.env.PAYLOAD_URL || ''
 
 let payloadHostname = 'localhost'
 try {
