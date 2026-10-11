@@ -15,28 +15,36 @@ const dirname = path.dirname(filename)
 
 const storefrontOrigin = process.env.STOREFRONT_URL || 'http://localhost:3000'
 
-/** Prefer cloud URLs; append Supabase transaction-pooler flags Drizzle/pg need. */
+/** Prefer cloud URLs; append Supabase pooler / TLS flags Drizzle + node-pg need on Vercel. */
 function resolveDatabaseUri(): string {
   let uri =
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||
     process.env.DATABASE_URI ||
     ''
-  if (!uri) return ''
+  if (!uri) return uri
 
-  const isSupabasePooler = /pooler\.supabase\.com|:6543\b/.test(uri)
-  if (!isSupabasePooler) return uri
+  const isSupabase = /supabase\.com|:6543\b/.test(uri)
+  if (!isSupabase) return uri
 
   const join = (u: string) => (u.includes('?') ? '&' : '?')
-  if (!/[?&]sslmode=/.test(uri)) uri += `${join(uri)}sslmode=require`
-  if (!/[?&]pgbouncer=/.test(uri)) uri += `${join(uri)}pgbouncer=true`
-  // node-pg: disable prepared statements (unsupported in transaction pooler)
-  if (!/[?&]prepareThreshold=/.test(uri)) uri += `${join(uri)}prepareThreshold=0`
+  // Vercel Node rejects Supabase chain with sslmode=require → use no-verify
+  if (/[?&]sslmode=/.test(uri)) {
+    uri = uri.replace(/([?&]sslmode=)[^&]*/i, '$1no-verify')
+  } else {
+    uri += `${join(uri)}sslmode=no-verify`
+  }
+  const isPooler = /pooler\.supabase\.com|:6543\b/.test(uri)
+  if (isPooler) {
+    if (!/[?&]pgbouncer=/.test(uri)) uri += `${join(uri)}pgbouncer=true`
+    // node-pg: disable prepared statements (unsupported in transaction pooler)
+    if (!/[?&]prepareThreshold=/.test(uri)) uri += `${join(uri)}prepareThreshold=0`
+  }
   return uri
 }
 
 const databaseUri = resolveDatabaseUri()
-const usingSupabasePooler = /pooler\.supabase\.com|:6543\b/.test(databaseUri)
+const isSupabaseDb = /supabase\.com|:6543\b/.test(databaseUri)
 
 export default buildConfig({
   admin: {
@@ -67,11 +75,11 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: databaseUri,
+      // Supabase pooler presents a chain Node rejects on Vercel without this
+      ...(isSupabaseDb ? { ssl: { rejectUnauthorized: false } } : {}),
     },
     // ponytail: empty Supabase needs one push/seed; set PAYLOAD_DATABASE_PUSH=true once, then off
     push: process.env.PAYLOAD_DATABASE_PUSH === 'true',
-    // Transaction pooler (Supavisor :6543) is unreliable with Payload txs
-    ...(usingSupabasePooler ? { transactionOptions: false as const } : {}),
   }),
   cors: [storefrontOrigin],
   csrf: [storefrontOrigin],
