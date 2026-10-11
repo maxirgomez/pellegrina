@@ -20,6 +20,15 @@ const storefrontOrigin = process.env.STOREFRONT_URL || 'http://localhost:3000'
  * clients and returns EMAXCONNSESSION under serverless. DDL uses session only while
  * PAYLOAD_MIGRATING=true (build-time `payload migrate`).
  */
+/** Encode user/password if the password has raw special chars (e.g. quotes, ñ). */
+function encodePgCredentials(uri: string): string {
+  const m = uri.match(/^(postgresql:\/\/)([^:/?#]+):([^@/?#]*)@(.+)$/i)
+  if (!m) return uri
+  const [, scheme, user, pass, rest] = m
+  if (!pass || /%[0-9A-Fa-f]{2}/.test(pass)) return uri
+  return `${scheme}${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${rest}`
+}
+
 function resolveDatabaseUri(): string {
   let uri =
     process.env.DATABASE_URL ||
@@ -27,6 +36,8 @@ function resolveDatabaseUri(): string {
     process.env.DATABASE_URI ||
     ''
   if (!uri) return uri
+  uri = uri.replace(/^"|"$/g, '')
+  uri = encodePgCredentials(uri)
 
   const isSupabase = /supabase\.com|:6543\b/.test(uri)
   if (!isSupabase) return uri

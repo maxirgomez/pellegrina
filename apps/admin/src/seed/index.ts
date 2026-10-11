@@ -9,7 +9,7 @@ loadEnv({ path: path.resolve(here, '../../.env') })
 loadEnv({ path: path.resolve(here, '../../.env.local') })
 
 /** Minimal Lexical doc for richText seed fields */
-function lexicalParagraph(...paragraphs: string[]) {
+export function lexicalParagraph(...paragraphs: string[]) {
   return {
     root: {
       type: 'root',
@@ -241,9 +241,24 @@ async function seed() {
     },
   })
 
+  const homeResult = await seedHomeContent(payload)
+  payload.logger.info(`Home page ${homeResult.action} (id=${homeResult.id})`)
+
+  payload.logger.info('Seed complete')
+  process.exit(0)
+}
+
+export async function seedHomeContent(payload: {
+  find: Function
+  create: Function
+  update: Function
+  logger: { info: (msg: string) => void }
+}) {
   const existingHome = await payload.find({
     collection: 'pages',
-    where: { slug: { equals: 'home' } },
+    where: {
+      or: [{ slug: { equals: 'home' } }, { slug: { equals: '/' } }],
+    },
     limit: 1,
   })
 
@@ -499,22 +514,21 @@ async function seed() {
   }
 
   if (existingHome.docs.length === 0) {
-    await payload.create({
+    const created = await payload.create({
       collection: 'pages',
       data: homeData,
     })
     payload.logger.info('Created Home page with Pellegrina blocks')
-  } else {
-    await payload.update({
-      collection: 'pages',
-      id: existingHome.docs[0].id,
-      data: homeData,
-    })
-    payload.logger.info('Updated existing Home page with Pellegrina layout')
+    return { action: 'created' as const, id: created.id }
   }
 
-  payload.logger.info('Seed complete')
-  process.exit(0)
+  const updated = await payload.update({
+    collection: 'pages',
+    id: existingHome.docs[0].id,
+    data: homeData,
+  })
+  payload.logger.info('Updated existing Home page with Pellegrina layout')
+  return { action: 'updated' as const, id: updated.id }
 }
 
 seed().catch((err) => {

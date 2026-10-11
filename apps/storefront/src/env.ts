@@ -8,10 +8,16 @@ const schema = z.object({
 export type StorefrontEnv = z.infer<typeof schema>
 
 /** Fail-fast env validation for server components / build */
+function normalizePayloadUrl(raw: string | undefined): string | undefined {
+  if (!raw) return raw
+  // Common typo when pasting into Vercel: hhttps://
+  return raw.trim().replace(/^hhttps:\/\//i, 'https://')
+}
+
 export function getEnv(): StorefrontEnv {
   const parsed = schema.safeParse({
-    PAYLOAD_URL: process.env.PAYLOAD_URL || process.env.PPAYLOAD_URL,
-    PPAYLOAD_URL: process.env.PPAYLOAD_URL,
+    PAYLOAD_URL: normalizePayloadUrl(process.env.PAYLOAD_URL || process.env.PPAYLOAD_URL),
+    PPAYLOAD_URL: normalizePayloadUrl(process.env.PPAYLOAD_URL),
   })
 
   if (!parsed.success) {
