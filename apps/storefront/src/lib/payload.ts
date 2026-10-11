@@ -35,12 +35,22 @@ async function payloadFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>
 }
 
+/** CMS may store home as "home" or "/"; URLs use "" | "home". */
+function slugCandidates(slug: string): string[] {
+  const trimmed = (slug || '').replace(/^\/+|\/+$/g, '')
+  const isHome = trimmed === '' || trimmed === 'home'
+  if (isHome) return ['home', '/']
+  return [trimmed, `/${trimmed}`]
+}
+
 export async function getPageBySlug(slug: string): Promise<CmsPage | null> {
-  const resolved = slug === '' || slug === '/' ? 'home' : slug
-  const data = await payloadFetch<Paginated<CmsPage>>(
-    `/api/pages?where[slug][equals]=${encodeURIComponent(resolved)}&depth=2&limit=1`,
-  )
-  return data.docs[0] ?? null
+  for (const candidate of slugCandidates(slug)) {
+    const data = await payloadFetch<Paginated<CmsPage>>(
+      `/api/pages?where[slug][equals]=${encodeURIComponent(candidate)}&depth=2&limit=1`,
+    )
+    if (data.docs[0]) return data.docs[0]
+  }
+  return null
 }
 
 export async function getSiteSettings(): Promise<SiteSettings | null> {

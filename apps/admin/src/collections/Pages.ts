@@ -24,6 +24,16 @@ export const Pages: CollectionConfig = {
   access: {
     read: () => true,
   },
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data || typeof data.slug !== 'string') return data
+        const normalized = data.slug.replace(/^\/+|\/+$/g, '')
+        data.slug = normalized === '' ? 'home' : normalized
+        return data
+      },
+    ],
+  },
   fields: [
     {
       name: 'title',
@@ -38,7 +48,7 @@ export const Pages: CollectionConfig = {
       index: true,
       admin: {
         position: 'sidebar',
-        description: 'Use "home" for the landing root (/).',
+        description: 'Usá "home" para la portada (/). No uses "/".',
       },
     },
     {
