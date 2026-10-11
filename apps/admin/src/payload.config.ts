@@ -14,13 +14,29 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const storefrontOrigin = process.env.STOREFRONT_URL || 'http://localhost:3000'
-// Prefer cloud URLs first: a leftover DATABASE_URI=localhost from local .env
-// imported into Vercel otherwise wins and Payload fails to init.
-const databaseUri =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL ||
-  process.env.DATABASE_URI ||
-  ''
+
+/** Prefer cloud URLs; append Supabase transaction-pooler flags Drizzle/pg need. */
+function resolveDatabaseUri(): string {
+  let uri =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URI ||
+    ''
+  if (!uri) return ''
+
+  const isSupabasePooler = /pooler\.supabase\.com|:6543\b/.test(uri)
+  if (!isSupabasePooler) return uri
+
+  const join = (u: string) => (u.includes('?') ? '&' : '?')
+  if (!/[?&]sslmode=/.test(uri)) uri += `${join(uri)}sslmode=require`
+  if (!/[?&]pgbouncer=/.test(uri)) uri += `${join(uri)}pgbouncer=true`
+  // node-pg: disable prepared statements (unsupported in transaction pooler)
+  if (!/[?&]prepareThreshold=/.test(uri)) uri += `${join(uri)}prepareThreshold=0`
+  return uri
+}
+
+const databaseUri = resolveDatabaseUri()
+const usingSupabasePooler = /pooler\.supabase\.com|:6543\b/.test(databaseUri)
 
 export default buildConfig({
   admin: {
@@ -54,6 +70,8 @@ export default buildConfig({
     },
     // ponytail: empty Supabase needs one push/seed; set PAYLOAD_DATABASE_PUSH=true once, then off
     push: process.env.PAYLOAD_DATABASE_PUSH === 'true',
+    // Transaction pooler (Supavisor :6543) is unreliable with Payload txs
+    ...(usingSupabasePooler ? { transactionOptions: false as const } : {}),
   }),
   cors: [storefrontOrigin],
   csrf: [storefrontOrigin],
