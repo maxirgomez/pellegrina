@@ -14,8 +14,13 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const storefrontOrigin = process.env.STOREFRONT_URL || 'http://localhost:3000'
+// Prefer cloud URLs first: a leftover DATABASE_URI=localhost from local .env
+// imported into Vercel otherwise wins and Payload fails to init.
 const databaseUri =
-  process.env.DATABASE_URI || process.env.DATABASE_URL || process.env.POSTGRES_URL || ''
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.DATABASE_URI ||
+  ''
 
 export default buildConfig({
   admin: {
