@@ -9,6 +9,7 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { SiteSettings } from './globals/SiteSettings'
+import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -85,8 +86,9 @@ export default buildConfig({
       // Supabase pooler presents a chain Node rejects on Vercel without this
       ...(isSupabaseDb ? { ssl: { rejectUnauthorized: false } } : {}),
     },
-    // ponytail: force schema create on empty Supabase; turn off after /api/health ok
-    push: true,
+    // push only runs when NODE_ENV!==production; prod uses migrations on connect
+    push: false,
+    prodMigrations: migrations,
   }),
   cors: [storefrontOrigin],
   csrf: [storefrontOrigin],

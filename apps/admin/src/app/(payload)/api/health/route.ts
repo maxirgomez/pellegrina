@@ -3,7 +3,6 @@ import { getPayload } from 'payload'
 
 /** Diagnostic: surfaces Payload init errors without leaking secrets. */
 export async function GET() {
-  const push = true
   try {
     const payload = await getPayload({ config })
     const pages = await payload.find({ collection: 'pages', limit: 1 })
@@ -11,8 +10,6 @@ export async function GET() {
       ok: true,
       pages: pages.totalDocs,
       db: 'connected',
-      push,
-      pool: 'session',
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
@@ -28,6 +25,6 @@ export async function GET() {
       .replace(/postgresql:\/\/[^@]+@/gi, 'postgresql://***@')
       .replace(/password[^,\s]*/gi, 'password=***')
     console.error('[health]', message, cause)
-    return Response.json({ ok: false, error: safe, push }, { status: 500 })
+    return Response.json({ ok: false, error: safe }, { status: 500 })
   }
 }
