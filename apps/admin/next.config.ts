@@ -8,7 +8,8 @@ import { fileURLToPath } from 'url'
 loadEnv({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.env') })
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // Docker/self-host uses standalone; Vercel breaks with it
+  ...(process.env.VERCEL ? {} : { output: 'standalone' as const }),
   poweredByHeader: false,
   images: {
     localPatterns: [{ pathname: '/api/media/file/**' }],

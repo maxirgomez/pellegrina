@@ -191,8 +191,8 @@ async function seed() {
   if (!process.env.PAYLOAD_SECRET) {
     throw new Error('PAYLOAD_SECRET is required (load root .env)')
   }
-  if (!process.env.DATABASE_URI) {
-    throw new Error('DATABASE_URI is required')
+  if (!process.env.DATABASE_URI && !process.env.DATABASE_URL && !process.env.POSTGRES_URL) {
+    throw new Error('DATABASE_URI (or DATABASE_URL / POSTGRES_URL) is required')
   }
 
   // Dynamic import so dotenv runs before payload.config reads process.env

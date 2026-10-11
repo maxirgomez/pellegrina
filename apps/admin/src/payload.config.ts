@@ -14,6 +14,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const storefrontOrigin = process.env.STOREFRONT_URL || 'http://localhost:3000'
+const databaseUri =
+  process.env.DATABASE_URI || process.env.DATABASE_URL || process.env.POSTGRES_URL || ''
 
 export default buildConfig({
   admin: {
@@ -43,8 +45,10 @@ export default buildConfig({
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || '',
+      connectionString: databaseUri,
     },
+    // ponytail: empty Supabase needs one push/seed; set PAYLOAD_DATABASE_PUSH=true once, then off
+    push: process.env.PAYLOAD_DATABASE_PUSH === 'true',
   }),
   cors: [storefrontOrigin],
   csrf: [storefrontOrigin],
